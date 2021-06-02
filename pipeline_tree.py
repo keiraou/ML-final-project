@@ -36,7 +36,6 @@ def read_data(csv):
 # Data Preprocessing
 def preprocess_data(df, features_col, target_col, categorical_col):
     df.dropna(subset=[target_col],inplace=True)
-    df = impute_missing_median(df, NUMERIC_FEATURES)
     df = fill_categorical_na_vals(df)
     features = df[features_col]
     features = pd.get_dummies(features, columns=categorical_col)
@@ -44,15 +43,17 @@ def preprocess_data(df, features_col, target_col, categorical_col):
     return features, target
 
 
-def impute_missing_median(df, col_lst):
+def impute_missing_median(X_train, X_test, col_lst):
     '''
     Impute missing values of continuous variables using the median value
     '''
     for col in col_lst:
-        df.loc[(df[col] == "don't know") | (df[col] == "non-numeric response") , col] = None
-        median = df[col].median()
-        df[col].fillna(median,inplace=True)
-    return df
+        X_train.loc[(X_train[col] == "don't know") | (X_train[col] == "non-numeric response") , col] = None
+        X_test.loc[(X_test[col] == "don't know") | (X_test[col] == "non-numeric response") , col] = None
+        median = X_train[col].median()
+        X_train[col].fillna(median,inplace=True)
+        X_test[col].fillna(median,inplace=True)
+    return X_train, X_test
 
 
 def fill_categorical_na_vals(df):
@@ -70,6 +71,8 @@ def split_data(features, target):
                                                     target, 
                                                     test_size=0.20, 
                                                     random_state=505)
+    X_train, X_test = impute_missing_median(
+        X_train, X_test, NUMERIC_FEATURES)
     return X_train, X_test, y_train, y_test
 
 
