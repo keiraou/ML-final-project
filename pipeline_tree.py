@@ -76,7 +76,7 @@ def split_data(features, target):
 # Train Decision Tree Model
 def train_decision_tree(X_train, X_test, y_train, y_test):
     params = {'criterion': ['gini', 'entropy'],
-                'max_depth': [3,5,10,20],
+                'max_depth': [3,5,10,15],
                 'min_samples_split': [2,5,10]}
     grid_model = GridSearchCV(estimator=DecisionTreeClassifier(random_state=505), 
                               param_grid=params, 
@@ -88,16 +88,16 @@ def train_decision_tree(X_train, X_test, y_train, y_test):
     grid_model.fit(X_train, y_train)
 
     grid_result = pd.DataFrame(grid_model.cv_results_)
-    grid_result[['params','mean_train_f1','mean_train_accuracy', 'mean_train_precision','mean_train_recall','mean_train_roc_auc']]
-    grid_result.sort_values(by=['mean_train_f1'], ascending=False)
-    pd.set_option('max_colwidth',500)
+    grid_result = grid_result[['params','mean_train_f1','mean_train_accuracy', 'mean_train_precision','mean_train_recall','mean_train_roc_auc']]
+    grid_result = grid_result.sort_values(by=['mean_train_f1'], ascending=False)
+    return grid_result
 
 
 # Train Random Forest Model
 def train_random_forest(X_train, X_test, y_train, y_test):
-    params = {'n_estimators':[100, 1000],
+    params = {'n_estimators':[10, 100],
               'criterion': ['gini', 'entropy'],
-              'max_depth': [3,5,10,20],
+              'max_depth': [3,5,10,15],
               'min_samples_split': [2,5,10]}
     grid_model = GridSearchCV(estimator=RandomForestClassifier(random_state=505), 
                               param_grid=params, 
@@ -109,9 +109,9 @@ def train_random_forest(X_train, X_test, y_train, y_test):
     grid_model.fit(X_train, y_train)
 
     grid_result = pd.DataFrame(grid_model.cv_results_)
-    grid_result[['params','mean_train_f1','mean_train_accuracy', 'mean_train_precision','mean_train_recall','mean_train_roc_auc']]
-    grid_result.sort_values(by=['mean_train_f1'], ascending=False)
-    pd.set_option('max_colwidth',500)
+    grid_result = grid_result[['params','mean_train_f1','mean_train_accuracy', 'mean_train_precision','mean_train_recall','mean_train_roc_auc']]
+    grid_result = grid_result.sort_values(by=['mean_train_f1'], ascending=False)
+    return grid_result
 
 
 # Evaluate Testing Scores
