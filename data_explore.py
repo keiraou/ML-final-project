@@ -47,19 +47,19 @@ def multi_scatter(df, vars_interest):
 
 
 # Feature Importance
-def plot_importances(model, features, n=5, title=''):
+def plot_importances(model, X_train, n=5, title=''):
     '''
     Compute the relative importance of selected features in
     the model
     
     Inputs:
     - model
-    - features: lst of features
     - n (int): top n features, opt
     - title (str)
     '''
+    plt.close()
     importances = model.feature_importances_
-    np_features = np.array(features)
+    np_features = np.array(X_train.columns)
     sorted_idx = np.argsort(importances)[len(np_features)-n:]
     padding = np.arange(len(sorted_idx)) + 0.5
     pl.barh(padding, importances[sorted_idx], align='center')
