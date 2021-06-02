@@ -47,7 +47,7 @@ def multi_scatter(df, vars_interest):
 
 
 # Feature Importance
-def plot_importances(model, X_train, n=5, title=''):
+def plot_importances(model, X_train, n=10, title=''):
     '''
     Compute the relative importance of selected features in
     the model
