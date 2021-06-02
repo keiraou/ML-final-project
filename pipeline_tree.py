@@ -15,17 +15,18 @@ from sklearn.metrics import confusion_matrix, plot_confusion_matrix, plot_roc_cu
 import warnings
 warnings.filterwarnings('ignore')
 
-FEATURES = ['province','age','education', 'if_urban',
-                 'wealth_index', 'if_own_house',
-                 'if_employment', 'if_employment_current','employment_pay_method', 'if_earn_more',
-                 'partner_edu', 
-                 'num_child','sex_head_household', 'sexual_activity', 'ideal_num_child', 'partner_ideal_child', 'money_decide_person']
-NUMERIC_FEATURES = ['age','education','if_own_house','if_employment_current','partner_edu','num_child','ideal_num_child']
-CATGORICAL_FEATURES = ['province', 'if_urban',
-                 'wealth_index',
-                 'if_employment','employment_pay_method','if_earn_more', 
-                 'sex_head_household', 'sexual_activity', 'partner_ideal_child', 'money_decide_person']
-TARGET_LST = ['if_emo_vio', 'if_phy_vio', 'if_sex_vio', 'if_vio', 'num_vio']
+# FEATURES = ['province','age','education', 'if_urban',
+#                  'wealth_index', 'if_own_house',
+#                  'if_employment', 'if_employment_current','employment_pay_method', 'if_earn_more',
+#                  'partner_edu', 
+#                  'num_child','sex_head_household', 'sexual_activity', 'ideal_num_child', 'partner_ideal_child', 'money_decide_person']
+# NUMERIC_FEATURES = ['age','education','if_own_house','if_employment_current','partner_edu','num_child','ideal_num_child']
+# CATGORICAL_FEATURES = ['province', 'if_urban',
+#                  'wealth_index',
+#                  'if_employment','employment_pay_method','if_earn_more', 
+#                  'sex_head_household', 'sexual_activity', 'partner_ideal_child', 'money_decide_person']
+# TARGET_LST = ['if_emo_vio', 'if_phy_vio', 'if_sex_vio', 'if_vio', 'num_vio']
+# RESULT_MODEL = pd.DataFrame(columns = ('country','target','model','params','f1','accuracy','precision','recall','roc_auc','model_object'))
 
 
 # Read Data
@@ -66,7 +67,7 @@ def fill_categorical_na_vals(df):
 
 
 # Data Split
-def split_data(features, target):
+def split_data(features, target, NUMERIC_FEATURES):
     X_train, X_test, y_train, y_test = train_test_split(features, 
                                                     target, 
                                                     test_size=0.20, 
@@ -81,7 +82,7 @@ def train_decision_tree(X_train, X_test, y_train, y_test):
     params = {'criterion': ['gini', 'entropy'],
                 'max_depth': [3,5,10,15],
                 'min_samples_split': [2,5,10]}
-    grid_model = GridSearchCV(estimator=DecisionTreeClassifier(random_state=505), 
+    grid_model = GridSearchCV(estimator=DecisionTreeClassifier(), 
                               param_grid=params, 
                               cv=10,
                               return_train_score=True,
@@ -89,10 +90,9 @@ def train_decision_tree(X_train, X_test, y_train, y_test):
                               refit='f1')
 
     grid_model.fit(X_train, y_train)
-
     grid_result = pd.DataFrame(grid_model.cv_results_)
-    grid_result = grid_result[['params','mean_train_f1','mean_train_accuracy', 'mean_train_precision','mean_train_recall','mean_train_roc_auc']]
-    grid_result = grid_result.sort_values(by=['mean_train_f1'], ascending=False)
+    grid_result = grid_result[['params','mean_test_f1','mean_test_accuracy', 'mean_test_precision','mean_test_recall','mean_test_roc_auc']]
+    grid_result = grid_result.sort_values(by=['mean_test_f1'], ascending=False)
     return grid_result
 
 
@@ -102,33 +102,56 @@ def train_random_forest(X_train, X_test, y_train, y_test):
               'criterion': ['gini', 'entropy'],
               'max_depth': [3,5,10,15],
               'min_samples_split': [2,5,10]}
-    grid_model = GridSearchCV(estimator=RandomForestClassifier(random_state=505), 
+    grid_model = GridSearchCV(
+        estimator=RandomForestClassifier(), 
                               param_grid=params, 
                               cv=10,
                               return_train_score=True,
                               scoring=['f1', 'accuracy','precision','recall','roc_auc'],
-                              refit='f1')
+                              refit='recall')
 
     grid_model.fit(X_train, y_train)
-
     grid_result = pd.DataFrame(grid_model.cv_results_)
-    grid_result = grid_result[['params','mean_train_f1','mean_train_accuracy', 'mean_train_precision','mean_train_recall','mean_train_roc_auc']]
-    grid_result = grid_result.sort_values(by=['mean_train_f1'], ascending=False)
+    grid_result = grid_result[['params','mean_test_f1','mean_test_accuracy', 'mean_test_precision','mean_test_recall','mean_test_roc_auc']]
+    grid_result = grid_result.sort_values(by=['mean_test_f1'], ascending=False)
+    return grid_result
+
+
+# Train Gradient Boosting Classifier
+def train_gradient_boosting(X_train, X_test, y_train, y_test):
+    params = {'n_estimators':[10, 100],
+              'loss': ['deviance', 'exponential'],
+              'criterion': ['friedman_mse', 'mse', 'mae'],
+              'max_depth': [3,5,10,15],
+              'min_samples_split': [2,5,10]}
+    grid_model = GridSearchCV(
+        estimator=GradientBoostingClassifier(), 
+                              param_grid=params, 
+                              cv=10,
+                              return_train_score=True,
+                              scoring=['f1', 'accuracy','precision','recall','roc_auc'],
+                              refit='recall')
+
+    grid_model.fit(X_train, y_train)
+    grid_result = pd.DataFrame(grid_model.cv_results_)
+    grid_result = grid_result[['params','mean_test_f1','mean_test_accuracy', 'mean_test_precision','mean_test_recall','mean_test_roc_auc']]
+    grid_result = grid_result.sort_values(by=['mean_test_f1'], ascending=False)
     return grid_result
 
 
 # Evaluate Testing Scores
-def evaluate_test(model, X_test, y_test):
+def evaluate_test(model, X_test, y_test, row):
     y_pred = model.predict(X_test)
     plot_precision_recall_curve(model, X_test, y_test)
-    results_dict = {}
-    results_dict['f1'] = metrics.f1_score(y_test, y_pred)
-    results_dict['accuracy'] = metrics.accuracy_score(y_test, y_pred)
-    results_dict['precision'] = metrics.precision_score(y_test, y_pred)
-    results_dict['recall'] = metrics.recall_score(y_test, y_pred)
-    results_dict['roc_auc'] = metrics.roc_auc_score(y_test, y_pred)
+    # results_dict = {}
+    row['f1'] = metrics.f1_score(y_test, y_pred)
+    row['accuracy'] = metrics.accuracy_score(y_test, y_pred)
+    row['precision'] = metrics.precision_score(y_test, y_pred)
+    row['recall'] = metrics.recall_score(y_test, y_pred)
+    row['roc_auc'] = metrics.roc_auc_score(y_test, y_pred)
+    row['model_object'] = model
     plot_precision_recall_curve(model,X_test,y_test)
-    return results_dict
+    return row
 
 
 # Feature Importance
@@ -152,3 +175,87 @@ def plot_importances(model, X_train, n=10, title=''):
     pl.xlabel("Relative Importance")
     pl.title(title)
     pl.show()
+
+
+def one_country_model_decision_tree(df, country, TARGET_LST, FEATURES, CATGORICAL_FEATURES, NUMERIC_FEATURES, RESULT_MODEL):
+    '''
+    Use decision tree to model data of one country
+    '''
+
+    for target_col in TARGET_LST:
+        print("\n \n Target: ", target_col, "\n\n")
+        features, target = preprocess_data(df, FEATURES, target_col, CATGORICAL_FEATURES)
+        X_train, X_test, y_train, y_test = split_data(features, target, NUMERIC_FEATURES)
+        grid_result= train_decision_tree(X_train, X_test, y_train, y_test)
+        for params in grid_result['params']:
+            row_dict = {}
+            row_dict['country'] = country
+            row_dict['target'] = target_col
+            row_dict['model'] = 'DecisionTree'
+            row_dict['params'] = params
+            print('Params: ', params)
+            good_model = DecisionTreeClassifier(**params).fit(X_train, y_train)
+            row = evaluate_test(good_model, X_test, y_test, row_dict)
+            print(row)
+            # plot_importances(good_model, X_train, n=10, title= target_col + str(params))
+            RESULT_MODEL = RESULT_MODEL.append(row, ignore_index=True)
+    return RESULT_MODEL
+
+
+def one_country_model_random_forest(df, country, TARGET_LST, FEATURES, CATGORICAL_FEATURES, NUMERIC_FEATURES, RESULT_MODEL):
+    '''
+    Use random forest to model data of one country
+    '''
+    for target_col in TARGET_LST:
+        print("\n \n Target: ", target_col, "\n\n")
+        features, target = preprocess_data(df, FEATURES, target_col, CATGORICAL_FEATURES)
+        X_train, X_test, y_train, y_test = split_data(features, target, NUMERIC_FEATURES)
+        grid_result= train_random_forest(X_train, X_test, y_train, y_test)
+        for params in grid_result['params']:
+            row_dict = {}
+            row_dict['country'] = country
+            row_dict['target'] = target_col
+            row_dict['model'] = 'RandomForest'
+            row_dict['params'] = params
+            print('Params: ', params)
+            good_model = RandomForestClassifier(**params).fit(X_train, y_train)
+            row = evaluate_test(good_model, X_test, y_test, row_dict)
+            print(row)
+            # plot_importances(good_model, X_train, n=10, title= target_col + str(params))
+            RESULT_MODEL = RESULT_MODEL.append(row, ignore_index=True)
+    return RESULT_MODEL
+
+
+def one_country_model_gradient_boosting(df, country, TARGET_LST, FEATURES, CATGORICAL_FEATURES, NUMERIC_FEATURES, RESULT_MODEL):
+    '''
+    Use gradient boosting to model data of one country
+    '''
+    for target_col in TARGET_LST:
+        print("\n \n Target: ", target_col, "\n\n")
+        features, target = preprocess_data(df, FEATURES, target_col, CATGORICAL_FEATURES)
+        X_train, X_test, y_train, y_test = split_data(features, target, NUMERIC_FEATURES)
+        grid_result= train_gradient_boosting(X_train, X_test, y_train, y_test)
+        for params in grid_result['params']:
+            row_dict = {}
+            row_dict['country'] = country
+            row_dict['target'] = target_col
+            row_dict['model'] = 'GradientBoosting'
+            row_dict['params'] = params
+            print('Params: ', params)
+            good_model = GradientBoostingClassifier(**params).fit(X_train, y_train)
+            row = evaluate_test(good_model, X_test, y_test, row_dict)
+            print(row)
+            # plot_importances(good_model, X_train, n=10, title= target_col + str(params))
+            RESULT_MODEL = RESULT_MODEL.append(row, ignore_index=True)
+    return RESULT_MODEL
+
+
+def one_country_model_all_tree(df, country, TARGET_LST, FEATURES, CATGORICAL_FEATURES, NUMERIC_FEATURES, RESULT_MODEL):
+    '''
+    Use decision tree, random forest, gradient boosting
+    to model data of one country
+    '''
+    RESULT_MODEL = one_country_model_decision_tree(df, country, TARGET_LST, FEATURES, CATGORICAL_FEATURES, NUMERIC_FEATURES, RESULT_MODEL)
+    RESULT_MODEL = one_country_model_random_forest(df, country, TARGET_LST, FEATURES, CATGORICAL_FEATURES, NUMERIC_FEATURES, RESULT_MODEL)
+    RESULT_MODEL = one_country_model_gradient_boosting(df, country, TARGET_LST, FEATURES, CATGORICAL_FEATURES, NUMERIC_FEATURES, RESULT_MODEL)
+    return RESULT_MODEL
