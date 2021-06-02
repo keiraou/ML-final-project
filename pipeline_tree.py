@@ -2,6 +2,7 @@ import math
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import pylab as pl
 
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.pipeline import Pipeline 
@@ -128,13 +129,14 @@ def evaluate_test(model, X_test, y_test):
 
 
 # Feature Importance
-def plot_importances(model, n=5, title=''):
+def plot_importances(model, features, n=5, title=''):
     '''
     Compute the relative importance of selected features in
     the model
     
     Inputs:
     - model
+    - features: lst of features
     - n (int): top n features, opt
     - title (str)
     '''
