@@ -50,8 +50,8 @@ def impute_missing_median(X_train, X_test, col_lst):
     Impute missing values of continuous variables using the median value
     '''
     for col in col_lst:
-        X_train.loc[(X_train[col] == "don't know") | (X_train[col] == "non-numeric response") , col] = None
-        X_test.loc[(X_test[col] == "don't know") | (X_test[col] == "non-numeric response") , col] = None
+        X_train.loc[(X_train[col] == "don't know") | (X_train[col] == "non-numeric response") | (X_train[col] == "up to god"), col] = None
+        X_test.loc[(X_test[col] == "don't know") | (X_test[col] == "non-numeric response") | (X_test[col] == "up to god") , col] = None
         median = X_train[col].median()
         X_train[col].fillna(median,inplace=True)
         X_test[col].fillna(median,inplace=True)
@@ -175,6 +175,7 @@ def plot_importances(model, X_train, n=10, title=''):
     
     Inputs:
     - model
+    - X_train
     - n (int): top n features, opt
     - title (str)
     '''
@@ -279,8 +280,9 @@ def one_country_model_all_tree(df, country, TARGET_LST, FEATURES, CATGORICAL_FEA
     df_wrf = one_country_model_weighted_rf(df, country, TARGET_LST, FEATURES, CATGORICAL_FEATURES, NUMERIC_FEATURES, RESULT_MODEL)
     df_dt = one_country_model_decision_tree(df, country, TARGET_LST, FEATURES, CATGORICAL_FEATURES, NUMERIC_FEATURES, RESULT_MODEL)
     df_rf = one_country_model_random_forest(df, country, TARGET_LST, FEATURES, CATGORICAL_FEATURES, NUMERIC_FEATURES, RESULT_MODEL)
-    df_gb = one_country_model_gradient_boosting(df, country, TARGET_LST, FEATURES, CATGORICAL_FEATURES, NUMERIC_FEATURES, RESULT_MODEL)
-    result = pd.concat([df_brf, df_wrf, df_dt, df_rf, df_gb])
+    # df_gb = one_country_model_gradient_boosting(df, country, TARGET_LST, FEATURES, CATGORICAL_FEATURES, NUMERIC_FEATURES, RESULT_MODEL)
+    result = pd.concat([df_brf, df_wrf, df_dt, df_rf])
+    # result = pd.concat([df_brf, df_wrf, df_dt, df_rf, df_gb])
     return result
 
 
