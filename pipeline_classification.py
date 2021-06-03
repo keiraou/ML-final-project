@@ -114,7 +114,7 @@ def train_logistic_regression_SMOTE(X_train, y_train, country, target_col):
 
 def train_GaussianNB_SMOTE(X_train, y_train, country, target_col):
     
-    pipeline = make_pipeline((SMOTE(random_state=0)), GaussianNB(random_state=0))
+    pipeline = make_pipeline((SMOTE(random_state=0)), GaussianNB())
     params = {}
     model = GridSearchCV(estimator=pipeline,
                         param_grid=params,
@@ -130,6 +130,29 @@ def train_GaussianNB_SMOTE(X_train, y_train, country, target_col):
     result['country'] = country
     result['target'] = target_col
     result['model'] = 'GaussianNB'
+    result = result[['country','target','model','params','f1','accuracy','precision','recall','roc_auc']]
+    return result, model.best_estimator_.get_params()['steps'][1][1]
+
+
+def train_LinearSVC_SMOTE(X_train, y_train, country, target_col):
+    pipeline = make_pipeline(SMOTE(random_state=0), LinearSVC(random_state=0))
+
+    params = {'linearsvc__C': [0.01, 0.1, 1, 10, 100]}
+
+    model = GridSearchCV(estimator=pipeline,
+                        param_grid=params, 
+                        cv=10,
+                        return_train_score=True,
+                        scoring=['f1', 'accuracy','precision','recall','roc_auc'],
+                        refit='f1')
+
+    model.fit(X_train, y_train)
+    result = pd.DataFrame(model.cv_results_)
+    result = result[['params','mean_test_f1','mean_test_accuracy', 'mean_test_precision','mean_test_recall','mean_test_roc_auc']]
+    result.columns = ['params','f1','accuracy','precision','recall','roc_auc']
+    result['country'] = country
+    result['target'] = target_col
+    result['model'] = 'LinearSVC'
     result = result[['country','target','model','params','f1','accuracy','precision','recall','roc_auc']]
     return result, model.best_estimator_.get_params()['steps'][1][1]
 
@@ -185,8 +208,8 @@ def evaluate_test(model, X_test, y_test, p):
 
 def get_important_attributes(features_col, best_model):
     coeffs = pd.DataFrame.from_dict({'predictor':features_col,
-                                    'coefficient':best_model.coef_.flatten(),
-                                    'abs_coeffient':abs(best_model.coef_.flatten())})
+                                        'coefficient':best_model.coef_.flatten(),
+                                        'abs_coeffient':abs(best_model.coef_.flatten())})
 
     coeffs.sort_values(by='abs_coeffient', inplace=True, ascending=False)
     return coeffs
@@ -228,12 +251,27 @@ def name_target(y_train, y_test):
     return y_train1, y_train2, y_train3, y_train4, y_test1, y_test2, y_test3, y_test4
 
     
-def analyze_country(X_train, X_test, y_train, y_test, country, target_col, p):
-    result, best_model = train_logistic_regression_SMOTE(X_train, y_train, country, target_col)
-    eval = evaluate_test(best_model, X_test, y_test, p)
+def analyze_country(X_train, X_test, y_train, y_test, country, target_col, p, classification):
+    if classification == 'LR':
+        result, best_model = train_logistic_regression_SMOTE(X_train, y_train, country, target_col)  
+    if classification == 'SVC':
+        result, best_model = train_LinearSVC_SMOTE(X_train, y_train, country, target_col)   
+    if classification == 'NB':
+        result, best_model = train_GaussianNB_SMOTE(X_train, y_train, country, target_col) 
+
+    if classification != 'SVC':
+        eval = evaluate_test(best_model, X_test, y_test, p)
+        if classification == 'NB':
+            return result, eval
+
     coeffs = get_important_attributes(X_train.columns, best_model)
     plot_top10_attributes(coeffs, best_model)
-    return result, eval, coeffs
+
+    if classification == 'LR':
+        return result, eval, coeffs
+    
+    if classification == 'SVC':
+        return result, coeffs
 
 
 
