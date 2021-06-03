@@ -180,29 +180,28 @@ def train_logistic_regression(X_train, y_train, country, target_col):
     return result, model.best_estimator_
     
 
-def evaluate_test(model, X_test, y_test, p):
+def evaluate_test(model, X_test, y_test):
     #calculate y_score for the random forest model
-    pred_prob = model.predict_proba(X_test)[:,1]
+    # pred_prob = model.predict_proba(X_test)[:,1]
 
-    sort_y = sorted(zip(y_test, pred_prob), key = lambda x: x[1], reverse=True)
-    y_test, pred_prob = zip(*sort_y)
-    y_test = np.array(y_test)
-    y_pred = np.array(pred_prob)
+    # sort_y = sorted(zip(y_test, pred_prob), key = lambda x: x[1], reverse=True)
+    # y_test, pred_prob = zip(*sort_y)
+    # y_test = np.array(y_test)
+    # y_pred = np.array(pred_prob)
       
-    n = int(len(y_pred)*p)
-    y_pred[: n] = 1
-    y_pred[n: ] = 0
-    
-    row = {}
+    # n = int(len(y_pred)*p)
+    # y_pred[: n] = 1
+    # y_pred[n: ] = 0
 
+    y_pred = model.predict(X_test)
+
+    row = {}
     row['f1'] = f1_score(y_test, y_pred)
     row['accuracy'] = accuracy_score(y_test, y_pred)
     row['precision'] = precision_score(y_test, y_pred)
     row['recall'] = recall_score(y_test, y_pred)
     row['roc_auc'] = roc_auc_score(y_test, y_pred)
-    row['model_object'] = model
-    #plot_precision_recall_curve(model,X_test,y_test)
-    
+    plot_precision_recall_curve(model,X_test,y_test)
     return row
 
 
@@ -227,11 +226,11 @@ def prepare_data_contry(df, features_col, target_col, dummy, need_one_hot, need_
     
     if all:
         drop_na(df, target_col + dummy + need_one_hot)
-    drop_na(df, target_col + dummy + need_one_hot[:-1])
-    
-    if all:
         features, target = preprocess_data(df, features_col, target_col, need_one_hot)
-    features, target = preprocess_data(df, features_col[:-1], target_col, need_one_hot[:-1])
+
+    else:
+        drop_na(df, target_col + dummy + need_one_hot[:-1])
+        features, target = preprocess_data(df, features_col[:-1], target_col, need_one_hot[:-1])
     
     X_train, X_test, y_train, y_test = split_data(features, target, need_normalize)
     X_train, X_test = impute_missing_median(X_train, X_test)
@@ -251,7 +250,7 @@ def name_target(y_train, y_test):
     return y_train1, y_train2, y_train3, y_train4, y_test1, y_test2, y_test3, y_test4
 
     
-def analyze_country(X_train, X_test, y_train, y_test, country, target_col, p, classification):
+def analyze_country(X_train, X_test, y_train, y_test, country, target_col, classification):
     if classification == 'LR':
         result, best_model = train_logistic_regression_SMOTE(X_train, y_train, country, target_col)  
     if classification == 'SVC':
@@ -259,19 +258,26 @@ def analyze_country(X_train, X_test, y_train, y_test, country, target_col, p, cl
     if classification == 'NB':
         result, best_model = train_GaussianNB_SMOTE(X_train, y_train, country, target_col) 
 
-    if classification != 'SVC':
-        eval = evaluate_test(best_model, X_test, y_test, p)
-        if classification == 'NB':
-            return result, eval
+    eval = evaluate_test(best_model, X_test, y_test)
+
+    if classification == 'NB':
+        return result, eval
 
     coeffs = get_important_attributes(X_train.columns, best_model)
     plot_top10_attributes(coeffs, best_model)
+    return result, eval, coeffs
 
-    if classification == 'LR':
-        return result, eval, coeffs
+    # if classification != 'SVC':
+    #     eval = evaluate_test(best_model, X_test, y_test, p)
+
+
+
+
+    # if classification == 'LR':
+    #     return result, eval, coeffs
     
-    if classification == 'SVC':
-        return result, coeffs
+    # if classification == 'SVC':
+    #     return result, coeffs
 
 
 
