@@ -101,6 +101,7 @@ def train_decision_tree(X_train, X_test, y_train, y_test, country, target_col):
     return grid_result
 
 
+
 # Train Random Forest Model
 def train_random_forest(X_train, X_test, y_train, y_test, country, target_col):
     params = {'n_estimators':[10],
