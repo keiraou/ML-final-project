@@ -101,7 +101,6 @@ def train_decision_tree(X_train, X_test, y_train, y_test, country, target_col):
     return grid_result
 
 
-
 # Train Random Forest Model
 def train_random_forest(X_train, X_test, y_train, y_test, country, target_col):
     params = {'n_estimators':[10],
@@ -219,6 +218,7 @@ def one_country_model_decision_tree(df, country, TARGET_LST, FEATURES, CATGORICA
     concated_grid_result = pd.concat(df_lst)
     return concated_grid_result
 
+
 def one_country_model_random_forest(df, country, TARGET_LST, FEATURES, CATGORICAL_FEATURES, NUMERIC_FEATURES, RESULT_MODEL):
     '''
     Use random forest to model data of one country
@@ -271,6 +271,7 @@ def one_country_model_gradient_boosting(df, country, TARGET_LST, FEATURES, CATGO
         df_lst.append(grid_result)
     concated_grid_result = pd.concat(df_lst)
     return concated_grid_result
+
 
 def one_country_model_all_tree(df, country, TARGET_LST, FEATURES, CATGORICAL_FEATURES, NUMERIC_FEATURES, RESULT_MODEL):
     '''
