@@ -267,18 +267,6 @@ def analyze_country(X_train, X_test, y_train, y_test, country, target_col, class
     plot_top10_attributes(coeffs, best_model)
     return result, eval, coeffs
 
-    # if classification != 'SVC':
-    #     eval = evaluate_test(best_model, X_test, y_test, p)
-
-
-
-
-    # if classification == 'LR':
-    #     return result, eval, coeffs
-    
-    # if classification == 'SVC':
-    #     return result, coeffs
-
 
 
 

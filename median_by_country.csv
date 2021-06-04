@@ -1,0 +1,6 @@
+country,Unnamed: 0,year,age,education,if_union,wealth_index_code,if_own_house,if_own_land,if_employment_current,num_household,num_child,if_emo_vio,if_phy_vio,if_phy_vio_severe,if_sex_vio,if_vio,num_vio
+Cambodia,8867.5,2014.0,32.0,5.0,1.0,2.0,1.0,1.0,1.0,5.0,2.0,0.0,0.0,0.0,0.0,0.0,0.0
+Maldives,3897.5,2016.0,33.0,10.0,1.0,1.0,0.0,1.0,0.0,6.0,2.0,0.0,0.0,0.0,0.0,0.0,0.0
+Nepal,6427.0,2016.0,31.0,4.0,1.0,2.0,0.0,0.0,1.0,5.0,2.0,0.0,0.0,0.0,0.0,0.0,0.0
+Pakistan,7556.5,2017.0,32.0,0.0,1.0,2.0,0.0,0.0,0.0,7.0,3.0,0.0,0.0,0.0,0.0,0.0,0.0
+Philippines,13052.0,2017.0,35.0,11.0,1.0,1.0,1.0,0.0,1.0,5.0,2.0,0.0,0.0,0.0,0.0,0.0,0.0
