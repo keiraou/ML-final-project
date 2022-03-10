@@ -1,37 +1,27 @@
-## Welcome to GitHub Pages
+## Machine Learning Project: Identify Women’s Risks of Intimate Partner Violence with Evidence from South East Asia
 
-You can use the [editor on GitHub](https://github.com/keiraou/ML-final-project/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
-
-### Markdown
+### Background and Solution Overview
 
 Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+- Intimate partner violence (IPV) is one of the most common forms of violence against women and includes physical, sexual, and emotional abuse.
+- South East Asia is one of the areas with highest prevalence of physical and sexual IPV of around 37%.
+- The goal of this study are:
+  - To report the prevalence of IPV among ever married or cohabiting women in Pakistan, Cambodia, Philippines, Maldives and Nepal
+  - To develop classification algorithms on individual-level variables and couple-level variables to predict whether a specific woman is prone to IPV in these five countries;
+  - To identify important features associated with experiencing physical, sexual or emotional IPV.
 
-```markdown
-Syntax highlighted code block
 
-# Header 1
-## Header 2
-### Header 3
+### Data Source
 
-- Bulleted
-- List
+- Main data source is Demographic and Health Surveys (DHS) conducted by the United States Agency of International Development
+- DHS program had developed a standard module and methodology for the collection of data on domestic violence by 2000.
+- The standard module was used in all of the countries examined in this report: Cambodia(2014), Maldives(2016), Nepal(2016), Pakistan(2017), Philippines(2017)
+- We filtered data using the variable if_union to only include women who are currently or formerly married (or live with a partner)
+ 
+ 
+ ### Machine Learning Approach
+- We developed binary classification - algorithms with individual-level variables and couple-level variables to predict whether a specific ever married or cohabiting woman is prone to each category of IPV in Pakistan, Cambodia, Philippines, Maldives and Nepal.
+- Using ten-fold cross-validation, we trained Balanced Random Forest, Weighted Random Forest, Decision Tree, Random Forest, Logistic Regression, Linear Support Vector Machines and Gaussian Naive Bayes models with Synthetic Minority Over-sampling Technique
 
-1. Numbered
-2. List
 
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [Basic writing and formatting syntax](https://docs.github.com/en/github/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/keiraou/ML-final-project/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
